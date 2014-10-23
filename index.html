@@ -5,6 +5,20 @@
         <script src="todo.js"></script>
     </head>
     <body>
+        <div ng-controller="TodoController as todoCtrl">
+            <form ng-submit="todoCtrl.addTodo()">
+                <input ng-model="todoCtrl.todoText">
+                </input>
+                <input type="submit" value="Add Item">
+                </input>
+            </form>
+            <ul>
+                <li ng-repeat="todo in todoCtrl.todos | filter:todoCtrl.search">
+                    <input type="checkbox" ng-model="todo.done">
+                    </input>
+                    {{todo.text}}
+                </li>
+            </ul>
         
     </body>
 </html>
