@@ -10,7 +10,7 @@
 
         todoCtrl.addTodo = function() {
             todoCtrl.todos.push({ text: todoCtrl.todoText,
-                done: false});
+                done: false });
             todoCtrl.todoText = '';
         };
         
@@ -23,6 +23,11 @@
             });
             return remaining;
         };
-         
+        
+        todoCtrl.markAllDone = function() {
+            todoCtrl.todos.forEach( function(todo) {
+               todo.done = true;
+            });
+        }; 
     });
 })();

@@ -30,9 +30,13 @@
                     </span>
                 </li>
             </ul>
-            <p>
+            <p ng-hide="todoCtrl.search.done">
                 {{todoCtrl.getRemainingCount()}} remaining!
             </p>
+            <a href ng-click="todoCtrl.markAllDone()" ng-hide="todoCtrl.search.done">
+                Mark all as done 
+            </a>
+            
 
         
     </body>
