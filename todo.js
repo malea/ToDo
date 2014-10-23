@@ -13,5 +13,16 @@
                 done: false});
             todoCtrl.todoText = '';
         };
+        
+        todoCtrl.getRemainingCount = function() {
+            var remaining = 0;
+            todoCtrl.todos.forEach( function(todo) {
+                if (!todo.done) {
+                    remaining++;
+                }
+            });
+            return remaining;
+        };
+         
     });
 })();
