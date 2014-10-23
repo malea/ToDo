@@ -14,6 +14,14 @@
             todoCtrl.todoText = '';
         };
         
+        todoCtrl.deleteArchiveAll = function() {
+            for (var i = todoCtrl.todos.length - 1; i >= 0; i--) {
+                if (todoCtrl.todos[i].done) {
+                    todoCtrl.todos.splice(i,1);
+                }
+            }
+        }; 
+
         todoCtrl.getRemainingCount = function() {
             var remaining = 0;
             todoCtrl.todos.forEach( function(todo) {

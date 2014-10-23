@@ -36,7 +36,9 @@
             <a href ng-click="todoCtrl.markAllDone()" ng-hide="todoCtrl.search.done">
                 Mark all as done 
             </a>
-            
+            <a href ng-click="todoCtrl.deleteArchiveAll()" ng-show="todoCtrl.search.done">
+               Delete all from Archive
+            </a> 
 
         
     </body>
