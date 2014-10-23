@@ -6,7 +6,14 @@
     </head>
     <body>
         <div ng-controller="TodoController as todoCtrl">
-            <form ng-submit="todoCtrl.addTodo()">
+            <a href ng-click="todoCtrl.search.done = false">
+                To Do
+            </a>
+            <a href ng-click="todoCtrl.search.done = true">
+                Archive
+            </a>
+            
+            <form ng-submit="todoCtrl.addTodo()" ng-hide="todoCtrl.search.done">
                 <input ng-model="todoCtrl.todoText">
                 </input>
                 <input type="submit" value="Add Item">
@@ -16,7 +23,11 @@
                 <li ng-repeat="todo in todoCtrl.todos | filter:todoCtrl.search">
                     <input type="checkbox" ng-model="todo.done">
                     </input>
-                    {{todo.text}}
+                    <input ng-model="todo.text" style="border:0" ng-hide="todo.done">
+                    </input>
+                    <span ng-show="todo.done">
+                        {{todo.text}}
+                    </span>
                 </li>
             </ul>
         
