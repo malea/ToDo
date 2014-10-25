@@ -61,16 +61,21 @@ def listTasks():
 
 def getTask(taskid):
     """get a specific task (in json)"""
+    google_id = getGoogleID()
     for task in tasks:
-        if task['id'] == taskid:
+        if task['id'] == taskid and task['userid'] == google_id:
             return json.dumps(task)
     abort(404)
 
 
 def createTask():
     """add a new task"""
+    google_id = getGoogleID()
     # get task from request
-    task = request.get_json()['msg']
+    task = request.get_json()
+
+    if task['userid'] != google_id:
+        abort(403) # forbidden
 
     # give it a new id
     global next_tid
@@ -86,10 +91,13 @@ def createTask():
 
 def updateTask(taskid):
     """update existing task"""
+    google_id = getGoogleID()
     found = False
     for task in tasks:
         if int(task['id']) == int(taskid):
-            task.update(request.get_json()['msg'])
+            if task['userid'] != google_id:
+                abort(403) # forbidden
+            task.update(request.get_json())
             found = True
     if not found:
         abort(404)
@@ -98,6 +106,7 @@ def updateTask(taskid):
 
 def deleteTask(taskid):
     """delete existing task"""
+    google_id = getGoogleID()
     task_tmp = None
     for task in tasks:
         if int(task['id']) == int(taskid):
@@ -105,6 +114,8 @@ def deleteTask(taskid):
     if task_tmp is None:
         abort(404)
     else:
+        if task_tmp['userid'] != google_id:
+            abort(403) # forbidden
         tasks.remove(task_tmp)
         return make_response('{}', 204)
 

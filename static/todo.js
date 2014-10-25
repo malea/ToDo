@@ -68,8 +68,7 @@
 
         todoCtrl.updateTask = function(task) {
             // PUT /api/tasks/:id
-            $http.put('/api/tasks/'+task.id, {
-                msg: task,
+            $http.put('/api/tasks/'+task.id, task, {
                 headers: {
                     'Google-Id-Token': $rootScope.fullToken
                 }
@@ -78,16 +77,17 @@
 
         todoCtrl.addTodo = function() {
             // POST /api/tasks
-            $http.post('/api/tasks', {
-                msg: {
+            $http.post('/api/tasks',
+                {
                     text: todoCtrl.todoText,
                     done: false,
                     userid: $rootScope.idToken.user_id
                 },
-                headers: {
-                    'Google-Id-Token': $rootScope.fullToken
-                }
-            })
+                {
+                    headers: {
+                        'Google-Id-Token': $rootScope.fullToken
+                    }
+                })
 
 
             todoCtrl.todoText = '';
