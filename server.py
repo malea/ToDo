@@ -28,6 +28,5 @@ tasks = [
 def index():
     return make_response(open('index.html').read())
 
-
 if __name__ == '__main__':
     app.run()
