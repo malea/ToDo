@@ -36,21 +36,20 @@
                     </a>
 
                     <form ng-submit="todoCtrl.addTodo()" ng-hide="todoCtrl.search.done">
-                        <input ng-model="todoCtrl.todoText">
+                        <input ng-model="todoCtrl.todoText" autofocus>
                         </input>
                         <input type="submit" value="Add Item">
                         </input>
                     </form>
                     <ul>
                         <li ng-repeat="todo in todoCtrl.todos | filter:todoCtrl.search">
-                            <input type="checkbox" ng-model="todo.done">
+                            <input type="checkbox" ng-change="todoCtrl.updateTask(todo)" ng-model="todo.done">
                             </input>
-                            <input ng-model="todo.text" style="border:0" ng-hide="todo.done">
+                            <input ng-model="todo.text" style="border:0" ng-change="todoCtrl.updateTask(todo)" ng-hide="todo.done">
                             </input>
                             <span ng-show="todo.done">
                                 {{todo.text}}
                             </span>
-                            [{{todo.userid}}]
                         </li>
                     </ul>
                     <p ng-hide="todoCtrl.search.done">
