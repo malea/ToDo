@@ -5,7 +5,8 @@ import requests
 from flask import Flask, abort, make_response, request
 
 app = Flask(__name__)
-    
+
+next_tid = 1
 #next_tid = 4
 #tasks = [
 #    {
@@ -79,7 +80,6 @@ def getTask(taskid):
         abort(404)
     return query
 
-#need help on this one
 def createTask():
     """add a new task"""
     google_id = getGoogleID()
@@ -93,10 +93,10 @@ def createTask():
     global next_tid
     new_id = next_tid
     next_tid += 1
-    task['id'] = new_id
-
-    # add to our list
-    tasks.append(task)
+    
+    # add to database 
+    new_task = Task.create(tid=new_id, uid=google_id, text=task['text'],
+                           done=False)
 
     # tell client it worked (200 OK)
     return make_response('{}', 200)
@@ -104,31 +104,28 @@ def createTask():
 def updateTask(taskid):
     """update existing task"""
     google_id = getGoogleID()
-    found = False
-    for task in tasks:
-        if int(task['id']) == int(taskid):
-            if task['userid'] != google_id:
-                abort(403) # forbidden
-            task.update(request.get_json())
-            found = True
-    if not found:
-        abort(404)
+    to_update = Task.get(Task.tid == taskid)
+    if to_update == []:
+        abort(404) # not found
+    elif to_update.userid != google_id:
+        abort(403) # forbidden
     else:
+        to_update.done = request.get_json().done
+        to_update.save()
+        to_update.text = request.get_json().text
+        to_update.save()
         return make_response('{}', 200)
 
 def deleteTask(taskid):
     """delete existing task"""
     google_id = getGoogleID()
-    task_tmp = None
-    for task in tasks:
-        if int(task['id']) == int(taskid):
-            task_tmp = task
-    if task_tmp is None:
-        abort(404)
+    to_delete = Task.get(tid == taskid)
+    if to_delete == []:
+        abort(404) # not found
+    elif to_delete.userid != google_id:
+        abort(403) # forbidden
     else:
-        if task_tmp['userid'] != google_id:
-            abort(403) # forbidden
-        tasks.remove(task_tmp)
+        to_delete.delete_instance()
         return make_response('{}', 204)
 
 if __name__ == '__main__':
