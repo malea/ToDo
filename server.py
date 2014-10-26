@@ -32,7 +32,7 @@ next_tid = 1
 db = SqliteDatabase('tasks.db')
 
 class Task(Model):
-   tid = IntField()
+   tid = IntegerField()
    userid = TextField()
    text = TextField()
    done = BooleanField()
