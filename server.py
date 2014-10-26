@@ -32,7 +32,7 @@ db = SqliteDatabase('tasks.db')
 
 class Task(Model):
    tid = IntField()
-   userid = CharField()
+   userid = TextField()
    text = TextField()
    done = BooleanField()
 
@@ -68,18 +68,18 @@ def taskAPI(taskid=None):
 
 def listTasks():
     google_id = getGoogleID()
-    results = [task for task in tasks if task['userid'] == google_id]
-    return json.dumps(results)
+    query = Task.select().where(Task.userid == google_id)
+    return json.dumps(query)
 
 def getTask(taskid):
     """get a specific task (in json)"""
     google_id = getGoogleID()
-    for task in tasks:
-        if task['id'] == taskid and task['userid'] == google_id:
-            return json.dumps(task)
-    abort(404)
+    query = Task.get(Task.tid == taskid and Task.userid == google_id)
+    if query == []:
+        abort(404)
+    return query
 
-
+#need help on this one
 def createTask():
     """add a new task"""
     google_id = getGoogleID()
@@ -132,4 +132,5 @@ def deleteTask(taskid):
         return make_response('{}', 204)
 
 if __name__ == '__main__':
+    db.create_tables([Task])
     app.run(debug=True)
