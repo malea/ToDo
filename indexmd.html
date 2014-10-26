@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html ng-app="ToDo">
+    <head>
+        <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.0/angular.min.js"></script>
+        <script src="static/todo.js"></script>
+    </head>
+    <body>
+        <div ng-controller="SigninController as signinCtrl">
+
+            <!-- user isn't logged in; show signin button-->
+            <div ng-hide="signinCtrl.loggedIn || !signinCtrl.loginCheck">
+                <p> Log In </p>
+                <span id="signinButton">
+                    <span
+                        class="g-signin"
+                        data-callback="globalGoogleSigninCallback"
+                        data-clientid="736007921871-u6v7ab2sivmog588i319lcsrb7drovkr.apps.googleusercontent.com"
+                        data-cookiepolicy="single_host_origin"
+                        data-scope="profile">
+                    </span>
+                </span>
+            </div>
+
+            <!-- user is logged in; show main page -->
+            <div ng-show="signinCtrl.loggedIn && signinCtrl.hasToken">
+                <div ng-controller="TodoController as todoCtrl">
+                    <a href ng-click="todoCtrl.search.done = false">
+                        To Do
+                    </a>
+                    <a href ng-click="todoCtrl.search.done = true">
+                        Archive
+                    </a>
+                    <a href onclick="gapi.auth.signOut()">
+                        Log Out
+                    </a>
+
+                    <form ng-submit="todoCtrl.addTodo()" ng-hide="todoCtrl.search.done">
+                        <input ng-model="todoCtrl.todoText" autofocus>
+                        </input>
+                        <input type="submit" value="Add Item">
+                        </input>
+                    </form>
+                    <ul>
+                        <li ng-repeat="todo in todoCtrl.todos | filter:todoCtrl.search">
+                            <input type="checkbox" ng-change="todoCtrl.updateTask(todo)" ng-model="todo.done">
+                            </input>
+                            <input ng-model="todo.text" style="border:0" ng-change="todoCtrl.updateTask(todo)" ng-hide="todo.done">
+                            </input>
+                            <span ng-show="todo.done">
+                                {{todo.text}}
+                            </span>
+                        </li>
+                    </ul>
+                    <p ng-hide="todoCtrl.search.done">
+                        {{todoCtrl.getRemainingCount()}} remaining!
+                    </p>
+                    <a href ng-click="todoCtrl.markAllDone()" ng-hide="todoCtrl.search.done">
+                        Mark all as done 
+                    </a>
+                    <a href ng-click="todoCtrl.deleteArchiveAll()" ng-show="todoCtrl.search.done">
+                       Delete all from Archive
+                    </a> 
+                </div>
+            </div>
+        
+    </body>
+</html>

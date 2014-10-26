@@ -1,31 +1,43 @@
 import random
 import json
+import peewee
 import requests
 from flask import Flask, abort, make_response, request
 
 app = Flask(__name__)
     
-next_tid = 4
-tasks = [
-    {
-        'id': 1, 
-        'userid': '118352708147713112407',
-        'text': u'Make a todo app',
-        'done': False
-    },
-    {
-        'id': 2,
-        'userid': '118352708147713112407',
-        'text': u'Buy groceries',
-        'done': False
-    },
-    {
-        'id': 3, 
-        'userid': '111111111111111',
-        'text': u'Add account functionality',
-        'done': False
-    }
-]
+#next_tid = 4
+#tasks = [
+#    {
+#        'id': 1, 
+#        'userid': '118352708147713112407',
+#        'text': u'Make a todo app',
+#        'done': False
+#    },
+#    {
+#        'id': 2,
+#        'userid': '118352708147713112407',
+#        'text': u'Buy groceries',
+#        'done': False
+#    },
+#    {
+#        'id': 3, 
+#        'userid': '111111111111111',
+#        'text': u'Add account functionality',
+#        'done': False
+#    }
+#]
+
+db = SqliteDatabase('tasks.db')
+
+class Task(Model):
+   tid = IntField()
+   userid = CharField()
+   text = TextField()
+   done = BooleanField()
+
+    class Meta:
+        database = db
 
 @app.route('/')
 def index():
