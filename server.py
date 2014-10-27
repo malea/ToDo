@@ -1,12 +1,26 @@
 import random
 import json
+import os
+import sys
 import peewee as pw
 import requests
 from flask import Flask, abort, make_response, request
 
 app = Flask(__name__)
 
-db = pw.SqliteDatabase('tasks.db')
+if not os.environ.get('NO_DEBUG'):
+    app.config['DEBUG'] = True
+
+if os.environ.get('USE_POSTGRES'):
+    db = pw.PostgresqlDatabase(
+        database='',
+        user='',
+        password='',
+        host='',
+        port='5432',
+    )
+else:
+    db = pw.SqliteDatabase('tasks.db')
 
 class Task(pw.Model):
    # tid = pw.IntegerField()
