@@ -1,6 +1,6 @@
 import random
 import json
-import peewee
+import peewee as pw
 import requests
 from flask import Flask, abort, make_response, request
 
@@ -29,16 +29,16 @@ next_tid = 1
 #    }
 #]
 
-db = SqliteDatabase('tasks.db')
+db = pw.SqliteDatabase('tasks.db')
 
-class Task(Model):
-   tid = IntegerField()
-   userid = TextField()
-   text = TextField()
-   done = BooleanField()
+class Task(pw.Model):
+   # tid = pw.IntegerField()
+   userid = pw.TextField()
+   text = pw.TextField()
+   done = pw.BooleanField()
 
-    class Meta:
-        database = db
+   class Meta:
+       database = db
 
 @app.route('/')
 def index():
