@@ -75,6 +75,13 @@
             })
         }
 
+        todoCtrl.check = function(task) {
+            setTimeout(function() {
+                task.done = !task.done;
+                todoCtrl.updateTask(task);
+            }, 500);
+        }
+
         todoCtrl.addTodo = function() {
             // POST /api/tasks
             $http.post('/api/tasks',
