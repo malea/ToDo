@@ -2,6 +2,9 @@
 *~
 .*.swp
 
+# sqlite test database
+tasks.db
+
 # Bower components
 bower_components/
 
