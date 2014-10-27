@@ -22,6 +22,9 @@ if os.environ.get('USE_POSTGRES'):
 else:
     db = pw.SqliteDatabase('tasks.db')
 
+if not Task.table_exists():
+    Task.create_table()
+
 class Task(pw.Model):
    # tid = pw.IntegerField()
    userid = pw.TextField()
@@ -115,6 +118,4 @@ def deleteTask(taskid):
         return make_response('{}', 204)
 
 if __name__ == '__main__':
-    if not Task.table_exists():
-        Task.create_table()
     app.run(debug=True)
