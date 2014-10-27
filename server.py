@@ -14,7 +14,7 @@ if not os.environ.get('NO_DEBUG'):
 
 # Use tasks.db if DATABASE_URL isn't set
 # (postgres on heroku sets this automatically)
-db = db_url.connect(os.environ.get('DATABASE_URL', 'sqlite:///tasks.db')
+db = db_url.connect(os.environ.get('DATABASE_URL', 'sqlite:///tasks.db'))
 
 class Task(pw.Model):
    # tid = pw.IntegerField()
