@@ -129,5 +129,6 @@ def deleteTask(taskid):
         return make_response('{}', 204)
 
 if __name__ == '__main__':
-    db.create_tables([Task])
+    if not Task.table_exists():
+        Task.create_table()
     app.run(debug=True)
