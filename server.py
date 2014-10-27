@@ -5,22 +5,16 @@ import sys
 import peewee as pw
 import requests
 from flask import Flask, abort, make_response, request
+from playhouse import db_url
 
 app = Flask(__name__)
 
 if not os.environ.get('NO_DEBUG'):
     app.config['DEBUG'] = True
 
-if os.environ.get('USE_POSTGRES'):
-    db = pw.PostgresqlDatabase(
-        database='',
-        user='',
-        password='',
-        host='',
-        port='5432',
-    )
-else:
-    db = pw.SqliteDatabase('tasks.db')
+# Use tasks.db if DATABASE_URL isn't set
+# (postgres on heroku sets this automatically)
+db = db_url.connect(os.environ.get('DATABASE_URL', 'sqlite:///tasks.db')
 
 class Task(pw.Model):
    # tid = pw.IntegerField()
