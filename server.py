@@ -70,12 +70,13 @@ def taskAPI(taskid=None):
 def listTasks():
     google_id = getGoogleID()
     query = Task.select().where(Task.userid == google_id)
-    return json.dumps(query)
+    results = list(query.dicts())
+    return json.dumps(results)
 
 def getTask(taskid):
     """get a specific task (in json)"""
     google_id = getGoogleID()
-    query = Task.get(Task.tid == taskid and Task.userid == google_id)
+    query = Task.get(Task.id == taskid and Task.userid == google_id)
     if query == []:
         abort(404)
     return query
@@ -88,14 +89,9 @@ def createTask():
 
     if task['userid'] != google_id:
         abort(403) # forbidden
-
-    # give it a new id
-    global next_tid
-    new_id = next_tid
-    next_tid += 1
     
     # add to database 
-    new_task = Task.create(tid=new_id, uid=google_id, text=task['text'],
+    new_task = Task.create(userid=google_id, text=task['text'],
                            done=False)
 
     # tell client it worked (200 OK)
@@ -104,22 +100,21 @@ def createTask():
 def updateTask(taskid):
     """update existing task"""
     google_id = getGoogleID()
-    to_update = Task.get(Task.tid == taskid)
+    to_update = Task.get(Task.id == taskid)
     if to_update == []:
         abort(404) # not found
     elif to_update.userid != google_id:
         abort(403) # forbidden
     else:
-        to_update.done = request.get_json().done
-        to_update.save()
-        to_update.text = request.get_json().text
+        to_update.done = request.get_json()['done']
+        to_update.text = request.get_json()['text']
         to_update.save()
         return make_response('{}', 200)
 
 def deleteTask(taskid):
     """delete existing task"""
     google_id = getGoogleID()
-    to_delete = Task.get(tid == taskid)
+    to_delete = Task.get(Task.id == taskid)
     if to_delete == []:
         abort(404) # not found
     elif to_delete.userid != google_id:
