@@ -9,6 +9,8 @@ from playhouse import db_url
 
 app = Flask(__name__)
 
+# For debugging: tells Flask to print error stack traces to the logs
+# It can be disabled with an environment variable.
 if not os.environ.get('NO_DEBUG'):
     app.config['DEBUG'] = True
 
@@ -17,7 +19,6 @@ if not os.environ.get('NO_DEBUG'):
 db = db_url.connect(os.environ.get('DATABASE_URL', 'sqlite:///tasks.db'))
 
 class Task(pw.Model):
-   # tid = pw.IntegerField()
    userid = pw.TextField()
    text = pw.TextField()
    done = pw.BooleanField()
@@ -34,10 +35,12 @@ def index():
 
 def getGoogleID():
     google_idtoken = request.headers.get('Google-Id-Token')
+    # After client provides the idtoken, send request to googleapi to verify
+    # that the token is authentic and unpacks it
     google_response = requests.get('https://www.googleapis.com/oauth2/v1/tokeninfo',
             params={'id_token': google_idtoken})
     if google_response.status_code != 200:
-        abort(401)
+        abort(401) #unauthorized
     parsed_token = google_response.json()
     return parsed_token['user_id']
 
@@ -61,12 +64,14 @@ def listTasks():
     results = list(query.dicts())
     return json.dumps(results)
 
+# This function ended up never being used. Could be for further
+# functionality.
 def getTask(taskid):
     """get a specific task (in json)"""
     google_id = getGoogleID()
     query = Task.get(Task.id == taskid and Task.userid == google_id)
     if query == []:
-        abort(404)
+        abort(404) #not found
     return query
 
 def createTask():

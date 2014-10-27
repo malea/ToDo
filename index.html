@@ -10,7 +10,13 @@
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     </head>
     <body style="margin-top: 20px">
+    <!--  container fluid for full-width container -->
     <div class="container-fluid" style="max-width: 960px; margin:auto">
+        <!-- SigninController is around everything (semi-global) because it controls
+        the entire layout. If this was true production code, this would need to be
+        refactored, because dependencies should be separate for testing (i.e. disable
+        signin...for automated tests, for instance). Things should be loosely-coupled,
+        and this was tightly coupled. -->
         <div ng-controller="SigninController as signinCtrl">
 
             <!-- user isn't logged in; show signin button-->
@@ -36,6 +42,17 @@
             <div ng-show="signinCtrl.loggedIn && signinCtrl.hasToken">
                 <div ng-controller="TodoController as todoCtrl">
                     <ul class="nav nav-tabs" role="tablist">
+                        <!-- search is the TodoControllers filter. It is how
+                        the app knows which tasks are visible. The only two
+                        searches I've implemented are completed vs. not completed
+                        which correspond to To Do vs. Archive. More functionality
+                        could be added here in a larger scoped project.
+
+                        Bad design choice on my part: Instead of corresponding
+                        this class with clicks as it should of been, I used the
+                        search filter: i.e. if the filter is showing done, I
+                        have it in Archive, if the filter is showing not done, it
+                        is in Todo. -->
                         <li ng-class="{active: !todoCtrl.search.done}">
                             <a href ng-click="todoCtrl.search.done = false">
                                 To Do
@@ -46,13 +63,17 @@
                                 Archive
                             </a>
                         </li>
+                        <!-- ng-click is evaluated within angular's current scope,
+                        which does not contain gapi (google's client-side js stuff)
+                        so used onclick. -->
                         <li>
                             <a href onclick="gapi.auth.signOut()">
                                 Log Out
                             </a>
                         </li>
                     </ul>
-
+                    <!-- Form to type in new todo shown when filter is on not done 
+                    stuff. As above, not a great choice. -->
                     <form ng-submit="todoCtrl.addTodo()" ng-hide="todoCtrl.search.done">
                         <input ng-model="todoCtrl.todoText" autofocus>
                         </input>
@@ -62,7 +83,17 @@
                     <ul>
                         <li ng-repeat="todo in todoCtrl.todos | filter:todoCtrl.search">
                             <div class="checkbox">
-                                <input type="checkbox" ng-change="todoCtrl.check(todo)" ng-model="todo.checked">
+                                <!-- Originally this was ng-model for todo.done, but
+                                this made todos instantly disappear from filtered view
+                                (checkbox action happened to fast. 
+
+                                To resolve, I did a probably quite bad thing:
+                                whenever someone changes the checkbox, I use callback
+                                to change this done value to the opposite, except
+                                the callback waits half a second before doing so.
+                                I couldn't get ng-change to work unless it was attached
+                                to a ng-model, so had to make a bogus model. -->
+                                <input type="checkbox" ng-change="todoCtrl.check(todo)" ng-model="todo.boguschecked">
                                 </input>
                                 <input class="form-control" ng-model="todo.text" style="border:0" ng-change="todoCtrl.updateTask(todo)" ng-hide="todo.done">
                                 </input>
@@ -72,6 +103,7 @@
                             </div>
                         </li>
                     </ul>
+                    <!-- Show # tasks remaining only in !done filter -->
                     <p ng-hide="todoCtrl.search.done">
                         {{todoCtrl.getRemainingCount()}} remaining!
                     </p>

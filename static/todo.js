@@ -5,10 +5,23 @@
                    function($window, $rootScope, $http) {
 
         var signinCtrl = this;
-        signinCtrl.loginCheck = false;
-        signinCtrl.loggedIn = false;
-        signinCtrl.hasToken = false;
 
+        // flag that is set true only after login attempted.
+        // It takes some time for google's api to check whether
+        // user is logged in already. Originally, the google
+        // callback just set loggedIn to true, but that caused a
+        // flicker where sign in dialog was displayed for a few
+        // seconds until google callback fired. To fix this, the
+        // layout doesnt show anything until loginCheck is true.
+        // Needs better flow.
+        signinCtrl.loginCheck = false;
+
+        // simple flag to tell whether user is logged in or not
+        signinCtrl.loggedIn = false;
+       
+        // put this callback on window, because give it as a callback
+        // to google sign in button, and it doesn't know angular's
+        // scope.  
         $window.globalGoogleSigninCallback = function(authResult) {
             signinCtrl.loginCheck = true;
             if (authResult['status']['signed_in']) {
@@ -20,9 +33,14 @@
                     {params: {id_token: idToken}})
                      .success(function(token) {
                         $rootScope.idToken = token;
-                        signinCtrl.hasToken = true;
 
-                        // sorry :-(
+                        // it is used elsewhere when changes to todos are
+                        // made, but after a user logs in, I needed a way
+                        // to initially populate the todo list. I can't do
+                        // this until I have the user's log in token, so this
+                        // is the first possible place to populate todos. 
+                        // needs refactoring... I added log in functionality
+                        // after getting the basic functionality working.
                         $rootScope.hacketyhack.refreshTodos();
                      })
                      .error(function() {
@@ -30,18 +48,11 @@
                      });
             }
             else {
+                // user sign in fails
                 var error = authResult['error'];
                 signinCtrl.loggedIn = false;
-                if (error === 'user_signed_out') {
-                    // user is signed out
-                }
-                else if (error === 'access_denied') {
-                    // used revoked access to our todo app
-                }
-                else if (error === 'immediate_failed') {
-                    // could not automatically login the user
-                }
             }
+            // required to make angular update everything
             $rootScope.$apply();
         };
     }]);
@@ -50,8 +61,14 @@
         var todoCtrl = this;
         todoCtrl.search = {done: false};
         todoCtrl.todos = [];
-
+        
         todoCtrl.refreshTodos = function() {
+            // Server needs token for user authentication (it makes
+            // request to google to verify that this user is who they
+            // say there are / a real google user.) In order to be RESTful,
+            // each request needs to contain all authentication info (for
+            // statelessness). But, I did not want to put this as a get param,
+            // because it would show up in the url, and that would be insecure.
             $http.get('/api/tasks', {headers: {
                 'Google-Id-Token': $rootScope.fullToken
             }}).success(function(tasks) {
@@ -62,32 +79,39 @@
             });
         };
 
-        // sorry :-(
+        // This corresponds to the hack above, which allows the 
+        // initial population of tasks following sign in. 
+        // In order for this function to be visible outside of the
+        // todocontroller scope, I had to dump it on the root scope.
+        // Bad Malea. 
         $rootScope.hacketyhack = {}
         $rootScope.hacketyhack.refreshTodos = todoCtrl.refreshTodos;
 
         todoCtrl.updateTask = function(task) {
             // PUT /api/tasks/:id
             $http.put('/api/tasks/'+task.id, task, {
-                headers: {
+                headers: { 
                     'Google-Id-Token': $rootScope.fullToken
                 }
             })
         }
 
         todoCtrl.check = function(task) {
+            // As explained in html, here is where I set this timeout to
+            // make the todos not disappear as fast when marked as done.
             setTimeout(function() {
                 task.done = !task.done;
                 todoCtrl.updateTask(task);
             }, 500);
         }
-
+        
         todoCtrl.addTodo = function() {
             // POST /api/tasks
             $http.post('/api/tasks',
                 {
                     text: todoCtrl.todoText,
                     done: false,
+                    // grab this from the global google sign in callback 
                     userid: $rootScope.idToken.user_id
                 },
                 {
